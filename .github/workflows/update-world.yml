@@ -1,0 +1,62 @@
+name: Update world
+
+on:
+  schedule:
+    - cron: '2-57/5 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'config/**'
+      - 'collector/**'
+      - 'lib/**'
+      - 'scripts/**'
+      - 'public/**'
+      - 'tests/**'
+      - 'package.json'
+      - '.github/workflows/update-world.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: capwars-world-writer
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    if: github.repository == 'cluchetto/capwars' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: write
+    steps:
+      - name: Check out latest main
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Validate and test
+        run: |
+          npm run tokens:check
+          npm test
+      - name: Collect prices and record the world
+        env:
+          COINGECKO_DEMO_API_KEY: ${{ secrets.COINGECKO_DEMO_API_KEY }}
+          COINGECKO_PRO_API_KEY: ${{ secrets.COINGECKO_PRO_API_KEY }}
+        run: npm run update
+      - name: Commit and publish one consistent state
+        run: |
+          git add -- state/
+          if git diff --cached --quiet; then
+            echo "No new market observation."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Record market observation"
+          git push origin HEAD:main

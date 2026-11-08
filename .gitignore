@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.*
+local-data/
+*.sqlite*
+*.pem
+*.key
+*.tmp
+.DS_Store
+.collector-lock/
