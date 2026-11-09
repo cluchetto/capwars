@@ -85,3 +85,13 @@ Natural Earth 1:110m, public domain (https://www.naturalearthdata.com/about/term
 Market API: https://docs.coingecko.com/reference/coins-markets. Values are timestamped observations; provider availability and API quotas apply independently of GitHub Actions.
 
 GitHub schedule documentation: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule.
+
+## Registering real country tokens
+
+Country names, symbols, descriptions, images and mainnet mint addresses are supported on the public globe. Until actual tokens exist, the six demo assets remain unchanged. Register the complete set together to replace the demo board; an identity change resets country assignment without generating captures. Existing funded reserves require a separate migration.
+
+Run `node scripts/register-factions.mjs /absolute/path/mainnet-factions.json` from this repository. The input is `{ "schemaVersion": 1, "network": "mainnet-beta", "simulationOnly": false, "factions": [...] }`. Each faction contains `city` (local city index 0–5), `name`, `symbol`, `description`, `mint`, and optional `image` (the corresponding `/faction-art/<city>.svg` or uploaded PNG/JPEG/WebP data URL). This command verifies that each mint is an initialized SPL mint on finalized mainnet before changing files. It does not verify ownership, pool fees, or launch safety. Private console fields are never copied.
+
+Publish the resulting `config/tokens.json` and any new `public/faction-art/` files to GitHub. GitHub Actions then collects by Solana mint through DEX Screener; no CoinGecko listing is required. The public page reads the catalog and shows the new profiles immediately after GitHub cache refresh, with a pending-market state until a complete observation exists. It never assigns the demo assets’ market caps to the new tokens. DEX Screener indexing is not instantaneous; missing market caps block the observation (FDV is not substituted). Its API lacks a price timestamp, so recorded time for this provider is retrieval time, not guaranteed trade freshness.
+
+The local launch runner is still a simulation. Connecting the real signing path to this registration/publication step remains required before launch-to-publication can be automatic. Do not register sandbox launches as mainnet tokens.

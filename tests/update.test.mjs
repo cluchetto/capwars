@@ -12,7 +12,8 @@ const fetchImpl=async()=>({ok:true,json:async()=>structuredClone(rows)});
 test('Durable state, retry idempotency, incomplete data and concurrent writers',async()=>{
   const directory=await mkdtemp(join(tmpdir(),'capwars-update-'));
   try{
-    await cp(new URL('config/',root),join(directory,'config'),{recursive:true});
+    await mkdir(join(directory,'config'));
+    await cp(new URL('tests/fixtures/catalog.json',root),join(directory,'config/tokens.json'));
     await cp(new URL('public/data/',root),join(directory,'public/data'),{recursive:true});
     assert.equal((await update({directory,check:true})).activeTokens,6);
     assert.equal((await update({directory,now,env:{},fetchImpl})).revision,1);

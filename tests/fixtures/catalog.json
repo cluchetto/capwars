@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "currency": "usd",
+  "maxAgeSeconds": 900,
+  "tokens": [
+    {
+      "id": "bitcoin",
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "city": "New York",
+      "lat": 40.7128,
+      "lon": -74.006,
+      "color": "#f0b45a",
+      "glyph": "₿",
+      "enabled": true,
+      "source": {
+        "provider": "coingecko",
+        "coinId": "bitcoin"
+      }
+    },
+    {
+      "id": "ethereum",
+      "symbol": "ETH",
+      "name": "Ethereum",
+      "city": "Paris",
+      "lat": 48.8566,
+      "lon": 2.3522,
+      "color": "#a99bf4",
+      "glyph": "Ξ",
+      "enabled": true,
+      "source": {
+        "provider": "coingecko",
+        "coinId": "ethereum"
+      }
+    },
+    {
+      "id": "solana",
+      "symbol": "SOL",
+      "name": "Solana",
+      "city": "Sydney",
+      "lat": -33.8688,
+      "lon": 151.2093,
+      "color": "#66d4b4",
+      "glyph": "≋",
+      "enabled": true,
+      "source": {
+        "provider": "coingecko",
+        "coinId": "solana"
+      }
+    },
+    {
+      "id": "binancecoin",
+      "symbol": "BNB",
+      "name": "BNB",
+      "city": "Pékin",
+      "lat": 39.9042,
+      "lon": 116.4074,
+      "color": "#dfd080",
+      "glyph": "◇",
+      "enabled": true,
+      "source": {
+        "provider": "coingecko",
+        "coinId": "binancecoin"
+      }
+    },
+    {
+      "id": "ripple",
+      "symbol": "XRP",
+      "name": "XRP",
+      "city": "Le Cap",
+      "lat": -33.9249,
+      "lon": 18.4241,
+      "color": "#7db9e9",
+      "glyph": "×",
+      "enabled": true,
+      "source": {
+        "provider": "coingecko",
+        "coinId": "ripple"
+      }
+    },
+    {
+      "id": "dogecoin",
+      "symbol": "DOGE",
+      "name": "Dogecoin",
+      "city": "São Paulo",
+      "lat": -23.5505,
+      "lon": -46.6333,
+      "color": "#e08a8d",
+      "glyph": "Ð",
+      "enabled": true,
+      "source": {
+        "provider": "coingecko",
+        "coinId": "dogecoin"
+      }
+    }
+  ]
+}

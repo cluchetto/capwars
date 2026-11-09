@@ -1,9 +1,11 @@
 import {Globe} from './globe.js';
 import {influenceWeights} from './engine.js';
-import {STATE_URL} from './settings.js';
+import {factionIcon,factionProfile} from './faction-profile.js';
+import {STATE_URL,CATALOG_URL} from './settings.js';
 const $ = s => document.querySelector(s);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let language = localStorage.getItem('capwars-language') === 'fr' ? 'fr' : 'en';
+let pendingFactions=null;
 let state, geo, grid, globe, signature, selected, layer = 0, busy = false, failed = false;
 const t = (en, fr) => language === 'fr' ? fr : en;
 const locale = () => language === 'fr' ? 'fr-FR' : 'en-US';
@@ -15,6 +17,7 @@ const date = v => new Date(v).toLocaleString(locale(), {dateStyle:'short',timeSt
 function translate() {
   document.documentElement.lang = language; $('#language-select').value = language;
   document.querySelectorAll('[data-en]').forEach(el => el.textContent = el.dataset[language]);
+  if(pendingFactions){renderPending();return;}
   if (state) {
     if(globe)globe.buttons.forEach((button,i)=>{const f=state.factions[i];button.querySelector('span').firstChild.textContent='★ '+cityName(f);button.setAttribute('aria-label',f.name+', '+t('starting capital','capitale de départ')+' '+cityName(f));});
     render();
@@ -34,10 +37,11 @@ function details() {
   } else {
     const f = state.factions.find(f => f.id === selected.id), c = state.coins.find(c => c.id === f.id);
     const countries = Object.values(state.countries).filter(c => c.ownerId === f.id);
-    $('#detail-content').innerHTML = `<h2>${escape(f.name)}</h2><p>${escape(cityName(f))} · ${escape(f.symbol)}</p><div class="detail-metrics"><div><small>${t('Market cap','Capitalisation')}</small><strong>${money(c.market_cap)}</strong></div><div><small>${t('Countries','Pays')}</small><strong>${countries.length}</strong></div><div><small>${t('24 h volume','Volume / 24 h')}</small><strong>${c.total_volume===null?'—':money(c.total_volume)}</strong></div><div><small>${t('Land influence','Influence terrestre')}</small><strong>${number(state.influence[f.id]*100)} %</strong></div></div><div class="reserve-card"><span>${t('AVAILABLE RESERVE','RÉSERVE DISPONIBLE')}</span><strong>${number(countries.reduce((s,c)=>s+c.reserveLamports,0)/1e9)} <small>SOL</small></strong></div><p>${t('Fee collection is not connected.','La collecte des frais n’est pas connectée.')}</p>`;
+    $('#detail-content').innerHTML = `<h2>${escape(f.name)}</h2><p>${escape(f.country||cityName(f))} · ${escape(f.symbol)}</p>${factionProfile(f,t)}<div class="detail-metrics"><div><small>${t('Market cap','Capitalisation')}</small><strong>${money(c.market_cap)}</strong></div><div><small>${t('Countries','Pays')}</small><strong>${countries.length}</strong></div><div><small>${t('24 h volume','Volume / 24 h')}</small><strong>${c.total_volume===null?'—':money(c.total_volume)}</strong></div><div><small>${t('Land influence','Influence terrestre')}</small><strong>${number(state.influence[f.id]*100)} %</strong></div></div><div class="reserve-card"><span>${t('AVAILABLE RESERVE','RÉSERVE DISPONIBLE')}</span><strong>${number(countries.reduce((s,c)=>s+c.reserveLamports,0)/1e9)} <small>SOL</small></strong></div><p>${t('Fee collection is not connected.','La collecte des frais n’est pas connectée.')}</p>`;
   }
 }
 function status() {
+  if(pendingFactions)return;
   if (!state) return;
   const stale = Date.now()-Date.parse(state.marketAt)>15*60*1000;
   $('.status-strip').classList.toggle('stale',stale||failed);
@@ -51,19 +55,35 @@ function render() {
   $('#capture-count').textContent = state.captureCount; $('#faction-count').textContent = String(state.factions.length).padStart(2,'0');
   $('#faction-list').innerHTML = state.factions.map(f=>{
     const coin=state.coins.find(c=>c.id===f.id),owned=all.filter(c=>c.ownerId===f.id),change=coin.price_change_percentage_24h;
-    return `<button class="faction-card" data-id="${escape(f.id)}" style="--faction:${f.color}"><div class="faction-top"><span class="token-icon">${escape(f.glyph)}</span><span class="token-name"><strong>${escape(f.name)}</strong><small>${escape(f.symbol)} · ${escape(cityName(f))}</small></span><span class="faction-share">${number(state.influence[f.id]*100)}<small>%</small></span></div><div class="faction-bottom"><span>${money(coin.market_cap)}</span><span class="${change>=0?'change-positive':'change-negative'}">${change===null?'—':number(change)+' %'}</span></div><div class="bar-track"><span style="width:${state.influence[f.id]*100}%"></span></div><div class="faction-ledger"><span><small>${t('Countries','Pays')}</small><strong>${owned.length}</strong></span><span><small>${t('Reserve','Réserve')}</small><strong>${number(owned.reduce((s,c)=>s+c.reserveLamports,0)/1e9)} SOL</strong></span></div></button>`;
+    return `<button class="faction-card" data-id="${escape(f.id)}" style="--faction:${f.color}"><div class="faction-top">${factionIcon(f)}<span class="token-name"><strong>${escape(f.name)}</strong><small>${escape(f.symbol)} · ${escape(f.country||cityName(f))}</small></span><span class="faction-share">${number(state.influence[f.id]*100)}<small>%</small></span></div><div class="faction-bottom"><span>${money(coin.market_cap)}</span><span class="${change>=0?'change-positive':'change-negative'}">${change===null?'—':number(change)+' %'}</span></div><div class="bar-track"><span style="width:${state.influence[f.id]*100}%"></span></div><div class="faction-ledger"><span><small>${t('Countries','Pays')}</small><strong>${owned.length}</strong></span><span><small>${t('Reserve','Réserve')}</small><strong>${number(owned.reduce((s,c)=>s+c.reserveLamports,0)/1e9)} SOL</strong></span></div></button>`;
   }).join('');
   $('#faction-list').querySelectorAll('button').forEach(b=>b.onclick=()=>choose(b.dataset.id));
   $('#capture-history').innerHTML = state.recentCaptures.length ? state.recentCaptures.map(e=>`<div class="history-row"><span>${date(e.observedAt)}</span><strong>${escape(name(state.countries[e.country]))}</strong><span>${escape(e.previousOwnerId)} → ${escape(e.newOwnerId)}</span><span>${number(e.budgetLamports/1e9)} SOL</span></div>`).join('') : `<p class="empty-state">${t('No conquests recorded yet. Initial ownership is not a conquest.','Aucune conquête enregistrée. L’attribution initiale des pays n’est pas une conquête.')}</p>`;
   details(); status();
 }
+function renderPending(){
+ $('#globe').hidden=true;$('#city-labels').hidden=true;$('#globe-loading').hidden=false;
+ $('#globe-loading').textContent=t('Waiting for prices for the launched factions.','En attente des prix des factions lancées.');
+ $('#status').textContent=t('Tokens registered · first complete market observation pending.','Tokens enregistrés · premier relevé de marché complet en attente.');
+ for(const id of ['total-cap','country-count','capture-count'])$('#'+id).textContent='—';
+ $('#token-count').textContent=`${pendingFactions.length} ${t('launched tokens','tokens lancés')}`;$('#faction-count').textContent=String(pendingFactions.length).padStart(2,'0');
+ $('#capture-history').textContent=t('The map will start with the first complete observation.','La carte démarrera avec le premier relevé complet.');
+ $('#faction-list').innerHTML=pendingFactions.map(f=>`<button class="faction-card" data-id="${escape(f.id)}" style="--faction:${f.color}"><div class="faction-top">${factionIcon(f)}<span class="token-name"><strong>${escape(f.name)}</strong><small>${escape(f.symbol)} · ${escape(f.country||f.city)}</small></span></div><p>${t('Awaiting market data','Données de marché en attente')}</p></button>`).join('');
+ const show=f=>$('#detail-content').innerHTML=`<h2>${escape(f.name)}</h2>${factionProfile(f,t)}`;
+ $('#faction-list').querySelectorAll('button').forEach(b=>b.onclick=()=>show(pendingFactions.find(f=>f.id===b.dataset.id)));show(pendingFactions[0]);
+}
 async function refresh() {
   if (busy) return; busy=true;$('#refresh').disabled=true;
   try {
-    const response = await fetch(STATE_URL,{cache:'no-store',signal:AbortSignal.timeout(15000)});
+    const [response,catalogResponse] = await Promise.all([fetch(STATE_URL,{cache:'no-store',signal:AbortSignal.timeout(15000)}),fetch(CATALOG_URL,{cache:'no-store',signal:AbortSignal.timeout(15000)})]);
+    if(!catalogResponse.ok)throw Error('Catalog unavailable');
+    const catalog=await catalogResponse.json();
     if (!response.ok) throw Error(`HTTP ${response.status}`);
     const next = await response.json();
     if (next.schemaVersion!==1||!Array.isArray(next.factions)||!next.factions.length||next.factions.length>16||!next.countries||!Number.isInteger(next.revision)) throw Error('Invalid state');
+    const launched=catalog.tokens?.filter(f=>f.enabled&&f.network==='mainnet-beta'&&f.mint);
+    if(launched?.length&&JSON.stringify(launched.map(f=>f.id+':'+f.mint).sort())!==JSON.stringify(next.factions.map(f=>f.id+':'+f.mint).sort())){pendingFactions=launched;renderPending();return;}
+    pendingFactions=null;$('#globe').hidden=false;$('#city-labels').hidden=false;
     if (state&&next.revision<state.revision) throw Error('Older state');
     if (!geo) {
       const [a,b] = await Promise.all([fetch('./data/countries.json'),fetch('./data/land-hires.bin')]);

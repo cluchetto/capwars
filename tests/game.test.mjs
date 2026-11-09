@@ -5,7 +5,7 @@ import {evolve, hash} from '../lib/game.mjs';
 import {InfluenceEngine, influenceWeights} from '../public/engine.js';
 import {catalogFingerprint} from '../collector/catalog.mjs';
 
-const catalog=JSON.parse(await readFile(new URL('../config/tokens.json',import.meta.url)));
+const catalog=JSON.parse(await readFile(new URL('./fixtures/catalog.json',import.meta.url)));
 const geo={width:4,height:1,countries:[{id:1,code:'AAA',name:'West',name_en:'West',area:1,sampled:true},{id:2,code:'BBB',name:'East',name_en:'East',area:1,sampled:true}]};
 const grid=new Uint8Array([1,1,2,2]);
 function snapshot(caps=[100,100],time='2026-11-09T12:00:00Z'){

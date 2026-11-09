@@ -7,7 +7,7 @@ import {collectMarkets, providers} from '../collector/collect.mjs';
 import {catalogFingerprint, validateCatalog} from '../collector/catalog.mjs';
 import {InfluenceEngine} from '../public/engine.js';
 
-const catalog = JSON.parse(await readFile(new URL('../config/tokens.json', import.meta.url)));
+const catalog = JSON.parse(await readFile(new URL('./fixtures/catalog.json', import.meta.url)));
 const raw = JSON.parse(await readFile(new URL('./fixtures/markets.json', import.meta.url)));
 const now = Date.parse('2026-11-09T12:00:00Z');
 const rows = raw.map(row => ({...row, last_updated: new Date(now - 1000).toISOString()}));

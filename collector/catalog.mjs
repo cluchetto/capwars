@@ -14,6 +14,10 @@ export function validateCatalog(catalog, providers) {
     ids.add(token.id);
     if (typeof token.enabled !== 'boolean' || ![token.name, token.symbol, token.city, token.glyph].every(label)) throw Error(`Invalid faction: ${token.id}`);
     if (!Number.isFinite(token.lat) || Math.abs(token.lat) > 90 || !Number.isFinite(token.lon) || Math.abs(token.lon) > 180 || !/^#[a-f0-9]{6}$/i.test(token.color)) throw Error(`Invalid geography or color: ${token.id}`);
+    if(token.description!==undefined&&(typeof token.description!=='string'||token.description.length>1000))throw Error('Invalid description');
+    if(token.image!==undefined&&!(typeof token.image==='string'&&(/^https:\/\//.test(token.image)||/^\/faction-art\/[a-z0-9-]+\.svg$/.test(token.image))))throw Error('Invalid public image');
+    if(token.website!==undefined&&token.website!=='https://capwars.pages.dev/')throw Error('Invalid faction website');
+    if(token.mint!==undefined&&(token.source?.provider!=='dexscreener'||token.mint!==token.source.mint||token.network!=='mainnet-beta'))throw Error('Invalid mainnet identity');
     const provider = token.source && Object.hasOwn(providers, token.source.provider) && providers[token.source.provider];
     if (!provider || typeof provider.fetch !== 'function' || typeof provider.validateSource !== 'function' || typeof provider.sourceKey !== 'function') throw Error(`Unsupported provider for ${token.id}`);
     provider.validateSource(token.source);

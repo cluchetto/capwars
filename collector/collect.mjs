@@ -1,7 +1,8 @@
 import {validateCatalog, catalogFingerprint} from './catalog.mjs';
 import {coingecko} from './providers/coingecko.mjs';
 
-export const providers = Object.freeze({coingecko});
+import {dexscreener} from './providers/dexscreener.mjs';
+export const providers = Object.freeze({coingecko,dexscreener});
 
 export async function collectMarkets(catalog, {
   adapters = providers, fetchImpl = globalThis.fetch, env = process.env,
@@ -18,7 +19,7 @@ export async function collectMarkets(catalog, {
   let records;
   try {
     records = (await Promise.all([...groups].map(([name, tokens]) => adapters[name].fetch(tokens, {
-      fetchImpl, env, signal: controller.signal,
+      fetchImpl, env, signal: controller.signal, now,
     })))).flat();
   } finally { clearTimeout(timer); controller.abort(); }
   if (records.length !== active.length) throw Error('Incomplete market snapshot');
