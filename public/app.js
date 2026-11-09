@@ -1,27 +1,34 @@
+import {languages,normalizeLanguage,languageLocale,languageDirection,translateMessage,localizedCity,localizedCountry} from './i18n.js';
 import {Globe} from './globe.js';
 import {influenceWeights} from './engine.js';
 import {factionIcon,factionProfile} from './faction-profile.js';
 import {STATE_URL,CATALOG_URL} from './settings.js';
 const $ = s => document.querySelector(s);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let language = localStorage.getItem('capwars-language') === 'fr' ? 'fr' : 'en';
+let language = normalizeLanguage(localStorage.getItem('capwars-language'));
+$('#language-select').replaceChildren(...languages.map(([code,label])=>{const option=document.createElement('option');option.value=code;option.textContent=label;option.lang=code;option.dir=languageDirection(code);return option;}));
 let pendingFactions=null;
 let state, geo, grid, globe, signature, selected, layer = 1, busy = false, failed = false;
-const t = (en, fr) => language === 'fr' ? fr : en;
-const locale = () => language === 'fr' ? 'fr-FR' : 'en-US';
+const t = (en, fr) => translateMessage(language,en,fr);
+const locale = () => languageLocale(language);
 const number = (n, digits = 2) => Number(n).toLocaleString(locale(), {maximumFractionDigits: digits});
 const money = n => Number(n).toLocaleString(locale(), {style:'currency',currency:'USD',notation:'compact',maximumFractionDigits:2});
-const cityName = f => language==='en' ? ({'Pékin':'Beijing','Le Cap':'Cape Town'}[f.city]||f.city) : f.city;
-const name = c => language === 'fr' ? c.name : c.name_en || c.name;
+const cityName = f => localizedCity(f.city,language);
+const factionLocation=f=>f.countryCode?localizedCountry({code:f.countryCode,name:f.country},language):f.country||cityName(f);
+const name = c => localizedCountry(c,language);
 const date = v => new Date(v).toLocaleString(locale(), {dateStyle:'short',timeStyle:'short'});
 function translate() {
-  document.documentElement.lang = language; $('#language-select').value = language;
-  document.querySelectorAll('[data-en]').forEach(el => el.textContent = el.dataset[language]);
+  document.documentElement.lang = language; document.documentElement.dir=languageDirection(language); $('#language-select').value = language;
+  $('#language-select').setAttribute('aria-label',t('Language')); $('#globe').setAttribute('aria-label',t('Interactive world globe'));
+  document.title='CapWars — '+t('Markets move. Empires rise.');
+  document.querySelector('meta[name=description]').content=t('One world. Competing currencies. Borders shaped by the market.');
+  document.querySelectorAll('[data-en]').forEach(el => el.textContent = t(el.dataset.en,el.dataset.fr));
   if(pendingFactions){renderPending();return;}
-  if (state) {
-    if(globe)globe.buttons.forEach((button,i)=>{const f=state.factions[i];button.querySelector('span').firstChild.textContent='★ '+cityName(f);button.setAttribute('aria-label',f.name+', '+t('starting capital','capitale de départ')+' '+cityName(f));});
-    render();
-  }
+  if (state) { updateCityLabels(); render(); }
+  else $('#status').textContent=failed?t('No published observation available yet. The map will appear after the first successful run.'):t('Loading the latest observation…');
+}
+function updateCityLabels(){
+ if(globe)globe.buttons.forEach((button,i)=>{const f=state.factions[i];button.querySelector('span').firstChild.textContent='★ '+cityName(f);button.setAttribute('aria-label',f.name+', '+t('starting capital')+' '+cityName(f));});
 }
 function choose(id, country = false) {
   selected = {id, country};
@@ -37,7 +44,7 @@ function details() {
   } else {
     const f = state.factions.find(f => f.id === selected.id), c = state.coins.find(c => c.id === f.id);
     const countries = Object.values(state.countries).filter(c => c.ownerId === f.id);
-    $('#detail-content').innerHTML = `<h2>${escape(f.name)}</h2><p>${escape(f.country||cityName(f))} · ${escape(f.symbol)}</p>${factionProfile(f,t)}<div class="detail-metrics"><div><small>${t('Market cap','Capitalisation')}</small><strong>${money(c.market_cap)}</strong></div><div><small>${t('Countries','Pays')}</small><strong>${countries.length}</strong></div><div><small>${t('24 h volume','Volume / 24 h')}</small><strong>${c.total_volume===null?'—':money(c.total_volume)}</strong></div><div><small>${t('Land influence','Influence terrestre')}</small><strong>${number(state.influence[f.id]*100)} %</strong></div></div><div class="reserve-card"><span>${t('AVAILABLE RESERVE','RÉSERVE DISPONIBLE')}</span><strong>${number(countries.reduce((s,c)=>s+c.reserveLamports,0)/1e9)} <small>SOL</small></strong></div><p>${t('Fee collection is not connected.','La collecte des frais n’est pas connectée.')}</p>`;
+    $('#detail-content').innerHTML = `<h2>${escape(f.name)}</h2><p>${escape(factionLocation(f))} · ${escape(f.symbol)}</p>${factionProfile(f,t)}<div class="detail-metrics"><div><small>${t('Market cap','Capitalisation')}</small><strong>${money(c.market_cap)}</strong></div><div><small>${t('Countries','Pays')}</small><strong>${countries.length}</strong></div><div><small>${t('24 h volume','Volume / 24 h')}</small><strong>${c.total_volume===null?'—':money(c.total_volume)}</strong></div><div><small>${t('Land influence','Influence terrestre')}</small><strong>${number(state.influence[f.id]*100)} %</strong></div></div><div class="reserve-card"><span>${t('AVAILABLE RESERVE','RÉSERVE DISPONIBLE')}</span><strong>${number(countries.reduce((s,c)=>s+c.reserveLamports,0)/1e9)} <small>SOL</small></strong></div><p>${t('Fee collection is not connected.','La collecte des frais n’est pas connectée.')}</p>`;
   }
 }
 function status() {
@@ -55,7 +62,7 @@ function render() {
   $('#capture-count').textContent = state.captureCount; $('#faction-count').textContent = String(state.factions.length).padStart(2,'0');
   $('#faction-list').innerHTML = state.factions.map(f=>{
     const coin=state.coins.find(c=>c.id===f.id),owned=all.filter(c=>c.ownerId===f.id),change=coin.price_change_percentage_24h;
-    return `<button class="faction-card" data-id="${escape(f.id)}" style="--faction:${f.color}"><div class="faction-top">${factionIcon(f)}<span class="token-name"><strong>${escape(f.name)}</strong><small>${escape(f.symbol)} · ${escape(f.country||cityName(f))}</small></span><span class="faction-share">${number(state.influence[f.id]*100)}<small>%</small></span></div><div class="faction-bottom"><span>${money(coin.market_cap)}</span><span class="${change>=0?'change-positive':'change-negative'}">${change===null?'—':number(change)+' %'}</span></div><div class="bar-track"><span style="width:${state.influence[f.id]*100}%"></span></div><div class="faction-ledger"><span><small>${t('Countries','Pays')}</small><strong>${owned.length}</strong></span><span><small>${t('Reserve','Réserve')}</small><strong>${number(owned.reduce((s,c)=>s+c.reserveLamports,0)/1e9)} SOL</strong></span></div></button>`;
+    return `<button class="faction-card" data-id="${escape(f.id)}" style="--faction:${f.color}"><div class="faction-top">${factionIcon(f)}<span class="token-name"><strong>${escape(f.name)}</strong><small>${escape(f.symbol)} · ${escape(factionLocation(f))}</small></span><span class="faction-share">${number(state.influence[f.id]*100)}<small>%</small></span></div><div class="faction-bottom"><span>${money(coin.market_cap)}</span><span class="${change>=0?'change-positive':'change-negative'}">${change===null?'—':number(change)+' %'}</span></div><div class="bar-track"><span style="width:${state.influence[f.id]*100}%"></span></div><div class="faction-ledger"><span><small>${t('Countries','Pays')}</small><strong>${owned.length}</strong></span><span><small>${t('Reserve','Réserve')}</small><strong>${number(owned.reduce((s,c)=>s+c.reserveLamports,0)/1e9)} SOL</strong></span></div></button>`;
   }).join('');
   $('#faction-list').querySelectorAll('button').forEach(b=>b.onclick=()=>choose(b.dataset.id));
   $('#capture-history').innerHTML = state.recentCaptures.length ? state.recentCaptures.map(e=>`<div class="history-row"><span>${date(e.observedAt)}</span><strong>${escape(name(state.countries[e.country]))}</strong><span>${escape(e.previousOwnerId)} → ${escape(e.newOwnerId)}</span><span>${number(e.budgetLamports/1e9)} SOL</span></div>`).join('') : `<p class="empty-state">${t('No conquests recorded yet. Initial ownership is not a conquest.','Aucune conquête enregistrée. L’attribution initiale des pays n’est pas une conquête.')}</p>`;
@@ -68,7 +75,7 @@ function renderPending(){
  for(const id of ['total-cap','country-count','capture-count'])$('#'+id).textContent='—';
  $('#token-count').textContent=`${pendingFactions.length} ${t('launched tokens','tokens lancés')}`;$('#faction-count').textContent=String(pendingFactions.length).padStart(2,'0');
  $('#capture-history').textContent=t('The map will start with the first complete observation.','La carte démarrera avec le premier relevé complet.');
- $('#faction-list').innerHTML=pendingFactions.map(f=>`<button class="faction-card" data-id="${escape(f.id)}" style="--faction:${f.color}"><div class="faction-top">${factionIcon(f)}<span class="token-name"><strong>${escape(f.name)}</strong><small>${escape(f.symbol)} · ${escape(f.country||f.city)}</small></span></div><p>${t('Awaiting market data','Données de marché en attente')}</p></button>`).join('');
+ $('#faction-list').innerHTML=pendingFactions.map(f=>`<button class="faction-card" data-id="${escape(f.id)}" style="--faction:${f.color}"><div class="faction-top">${factionIcon(f)}<span class="token-name"><strong>${escape(f.name)}</strong><small>${escape(f.symbol)} · ${escape(factionLocation(f))}</small></span></div><p>${t('Awaiting market data','Données de marché en attente')}</p></button>`).join('');
  const show=f=>$('#detail-content').innerHTML=`<h2>${escape(f.name)}</h2>${factionProfile(f,t)}`;
  $('#faction-list').querySelectorAll('button').forEach(b=>b.onclick=()=>show(pendingFactions.find(f=>f.id===b.dataset.id)));show(pendingFactions[0]);
 }
@@ -101,13 +108,13 @@ async function refresh() {
     const owners=new Int16Array(geo.countries.length+1).fill(-1);
     for(const c of Object.values(state.countries))owners[c.id]=state.factions.findIndex(f=>f.id===c.ownerId);
     globe.setMap(grid,null,2880,1440,owners,layer,influenceWeights(state.coins.map(c=>c.market_cap)));
-    failed=false;$('#globe-loading').hidden=true;render();
+    failed=false;$('#globe-loading').hidden=true;updateCityLabels();render();
   } catch(error) {
     failed=true;
     if(state)status();else $('#status').textContent=t('No published observation available yet. The map will appear after the first successful run.','Aucun relevé publié disponible. La carte apparaîtra après la première exécution réussie.');
   } finally {busy=false;$('#refresh').disabled=false;}
 }
-$('#language-select').onchange=e=>{language=e.target.value;localStorage.setItem('capwars-language',language);translate();};
+$('#language-select').onchange=e=>{language=normalizeLanguage(e.target.value);localStorage.setItem('capwars-language',language);translate();};
 $('#refresh').onclick=refresh;
 $('#home-view').onclick=()=>globe?.fly(16,12);
 for(const [id,value] of [['layer-influence',0],['layer-countries',1]])$("#"+id).onclick=()=>{layer=value;if(globe){globe.layer=value;globe.dirty=true;}$('#layer-influence').classList.toggle('active',!value);$('#layer-countries').classList.toggle('active',!!value);};
