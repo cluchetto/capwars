@@ -6,7 +6,7 @@ const $ = s => document.querySelector(s);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let language = localStorage.getItem('capwars-language') === 'fr' ? 'fr' : 'en';
 let pendingFactions=null;
-let state, geo, grid, globe, signature, selected, layer = 0, busy = false, failed = false;
+let state, geo, grid, globe, signature, selected, layer = 1, busy = false, failed = false;
 const t = (en, fr) => language === 'fr' ? fr : en;
 const locale = () => language === 'fr' ? 'fr-FR' : 'en-US';
 const number = (n, digits = 2) => Number(n).toLocaleString(locale(), {maximumFractionDigits: digits});
