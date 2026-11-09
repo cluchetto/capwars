@@ -28,3 +28,11 @@ test('Public profiles escape content and reject executable image URLs',()=>{
  const html=factionProfile({name:'France',description:'<script>alert(1)</script>',image:'/faction-art/paris.svg',mint,website:'https://capwars.pages.dev/'},en=>en);
  assert(!html.includes('<script>'));assert(html.includes('&lt;script&gt;'));assert(html.includes('https://solscan.io/token/'));assert(html.includes('paris.svg'));
 });
+
+test('Iran registration uses Tehran and preserves all seven stable city slots',async()=>{
+ const factions=Array.from({length:7},(_,city)=>({city,mint:mint.slice(0,-1)+'ABCDEFG'[city],name:`Country ${city}`,symbol:city===6?'IR':`FA${city}`,description:'Country faction'}));
+ const {catalog}=await registrationCatalog({...input,factions},{fetchImpl:response(goodAccount)});
+ assert.equal(catalog.tokens.length,7);
+ const iran=catalog.tokens[6];assert.equal(iran.country,'Iran');assert.equal(iran.countryCode,'IR');assert.equal(iran.city,'Tehran');assert.equal(iran.lat,35.6892);assert.equal(iran.lon,51.389);assert.equal(iran.image,'/faction-art/tehran.svg');
+ assert.equal(catalog.tokens[0].city,'New York');assert.equal(catalog.tokens[5].city,'São Paulo');
+});

@@ -11,9 +11,10 @@ const places=[
  ['CN','China','Beijing',39.9042,116.4074,'#dfd080','beijing'],
  ['ZA','South Africa','Cape Town',-33.9249,18.4241,'#7db9e9','cape-town'],
  ['BR','Brazil','São Paulo',-23.5505,-46.6333,'#e08a8d','sao-paulo'],
+ ['IR','Iran','Tehran',35.6892,51.3890,'#ed985e','tehran'],
 ];
 export async function registrationCatalog(input,{fetchImpl=fetch,rpc='https://api.mainnet-beta.solana.com'}={}){
- if(input?.schemaVersion!==1||input.network!=='mainnet-beta'||input.simulationOnly!==false||!Array.isArray(input.factions)||input.factions.length<1||input.factions.length>6)throw Error('A real mainnet registration is required; simulation drafts cannot be published');
+ if(input?.schemaVersion!==1||input.network!=='mainnet-beta'||input.simulationOnly!==false||!Array.isArray(input.factions)||input.factions.length<1||input.factions.length>places.length)throw Error('A real mainnet registration is required; simulation drafts cannot be published');
  const cities=new Set(),mints=new Set(),assets=[];
  const tokens=[];
  for(const f of input.factions){
