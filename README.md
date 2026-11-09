@@ -1,5 +1,7 @@
 # CapWars
 
+**Live site: https://capwars.florent-cloutier.chatgpt.site**
+
 **Markets move. Empires rise.** A public, automatic world-conquest prototype driven by cryptocurrency market capitalizations. English by default, French available in the globe.
 
 ## What runs here
@@ -72,7 +74,7 @@ The collector has an exclusive local lock. If a machine is interrupted, inspect 
 
 ## Hosting and scope
 
-`npm run build` creates a static `dist/` directory suitable for a separate static host. This setup publishes code and data to GitHub; it does not automatically activate website hosting. GitHub raw data may be cached and is suitable for this prototype, not a low-latency production API. Raw URLs are fixed in `public/settings.js`.
+`npm run build` creates a static `dist/` directory suitable for a separate static host. The public globe is hosted with Sites at https://capwars.florent-cloutier.chatgpt.site. Market observations continue to come from GitHub automatically. Changes to the website code require rebuilding and republishing the static site; they are not deployed by the market-data workflow. GitHub raw data may be cached and is suitable for this prototype, not a low-latency production API. Raw URLs are fixed in `public/settings.js`.
 
 The immutable full snapshots and frequent commits grow over time. Before a large or financially funded deployment, move the journal to durable database/object storage, provide backups and reconcile real on-chain fee receipts. Keep stable ids and migrate the existing journal; don't reinterpret earlier capture indexes.
 
