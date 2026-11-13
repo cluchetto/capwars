@@ -1,0 +1,12 @@
+{
+  "name": "CapWars France",
+  "symbol": "FR",
+  "description": "France enters CapWars. Raise your flag. Rewrite the map. In CapWars, a higher token price can expand your faction’s influence, conquer rival countries and seize their reserves. Pick your side, challenge rival factions and put your colors on the map. One planet. A battle for influence. Follow the conquest: https://capwars.pages.dev/",
+  "image": "https://raw.githubusercontent.com/cluchetto/capwars/token-assets/token-metadata/generated/ba2fd50d25fa5a77850d684ff0dfb4c1dbae6bf27f9e97b2ad7773a764282ac2.png",
+  "external_url": "https://capwars.pages.dev/",
+  "extensions": {
+    "website": "https://capwars.pages.dev/",
+    "twitter": "https://x.com/capwarsupdate",
+    "telegram": "https://t.me/capwars"
+  }
+}
