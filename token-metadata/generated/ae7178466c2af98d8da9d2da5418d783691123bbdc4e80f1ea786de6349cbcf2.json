@@ -1,0 +1,15 @@
+{
+  "name": "CapWars Brazil",
+  "symbol": "BR",
+  "description": "From São Paulo, Brazil enters CapWars. Electric streets. Relentless rhythm. A continent ready to make its mark. Raise your flag. Rewrite the map. In CapWars, a higher token price can expand your faction’s influence, conquer rival countries and seize their reserves. Pick your side and follow the conquest: https://capwars.pages.dev/",
+  "image": "https://raw.githubusercontent.com/cluchetto/capwars/token-assets/token-metadata/generated/e99319a9ff4a04e0f0a1acf9d3ab028b8b641592ba3194eaaca44ef385f9a137.png",
+  "website": "https://capwars.pages.dev/",
+  "twitter": "https://x.com/capwarsupdate",
+  "telegram": "https://t.me/capwars",
+  "external_url": "https://capwars.pages.dev/",
+  "extensions": {
+    "website": "https://capwars.pages.dev/",
+    "twitter": "https://x.com/capwarsupdate",
+    "telegram": "https://t.me/capwars"
+  }
+}
