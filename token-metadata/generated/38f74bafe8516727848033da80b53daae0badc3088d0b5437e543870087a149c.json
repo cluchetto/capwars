@@ -1,0 +1,15 @@
+{
+  "name": "CapWars China",
+  "symbol": "CN",
+  "description": "From Beijing, China enters CapWars. Ancient ambition meets a new frontier. Every border gained becomes the foundation for the next move. Raise your flag. Rewrite the map. In CapWars, a higher token price can expand your faction’s influence, conquer rival countries and seize their reserves. Pick your side and follow the conquest: https://capwars.pages.dev/",
+  "image": "https://raw.githubusercontent.com/cluchetto/capwars/token-assets/token-metadata/generated/53135a6707530386cbb51fe26d9e727bd5eb6c1a498fedcb27123831d48ccc84.png",
+  "website": "https://capwars.pages.dev/",
+  "twitter": "https://x.com/capwarsupdate",
+  "telegram": "https://t.me/capwars",
+  "external_url": "https://capwars.pages.dev/",
+  "extensions": {
+    "website": "https://capwars.pages.dev/",
+    "twitter": "https://x.com/capwarsupdate",
+    "telegram": "https://t.me/capwars"
+  }
+}
