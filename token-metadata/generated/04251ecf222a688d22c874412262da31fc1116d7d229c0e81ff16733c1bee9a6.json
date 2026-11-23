@@ -1,0 +1,19 @@
+{
+  "banner": "https://raw.githubusercontent.com/cluchetto/capwars/token-assets/token-metadata/generated/eecf492da220026cad2667d7d5946d2796772511535beddb92e684495f05950a.png",
+  "video": "https://raw.githubusercontent.com/cluchetto/capwars/token-assets/token-metadata/generated/31cae0b80aa670ed6ba3c6e8d845a8bc4aa99d60a49618978b8b0d1c7f712151.mp4",
+  "showName": true,
+  "createdOn": "https://pump.fun",
+  "name": "CapWars United States",
+  "symbol": "USA",
+  "description": "From New York, the United States enters CapWars. A skyline of ambition. A flag built to travel. Raise your flag. Rewrite the map. In CapWars, a higher token price can expand your faction’s influence, conquer rival countries and seize their reserves. Pick your side and follow the conquest: https://capwars.pages.dev/",
+  "image": "https://raw.githubusercontent.com/cluchetto/capwars/token-assets/token-metadata/generated/16eef5c24b60f5435e7a52a16205804f2f3ea88463d5992645f0d6fb774ed2ef.png",
+  "website": "https://capwars.pages.dev/",
+  "twitter": "https://x.com/capwarsupdate",
+  "telegram": "https://t.me/capwars",
+  "external_url": "https://capwars.pages.dev/",
+  "extensions": {
+    "website": "https://capwars.pages.dev/",
+    "twitter": "https://x.com/capwarsupdate",
+    "telegram": "https://t.me/capwars"
+  }
+}
