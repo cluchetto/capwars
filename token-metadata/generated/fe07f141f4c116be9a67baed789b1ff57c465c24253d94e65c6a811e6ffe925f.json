@@ -1,0 +1,19 @@
+{
+  "banner": "https://raw.githubusercontent.com/cluchetto/capwars/token-assets/token-metadata/generated/3d7d0c2863a365a0cac00cacd1b6333764ae0031b1cebbecc3a104f51d22c699.png",
+  "video": "https://raw.githubusercontent.com/cluchetto/capwars/token-assets/token-metadata/generated/31cae0b80aa670ed6ba3c6e8d845a8bc4aa99d60a49618978b8b0d1c7f712151.mp4",
+  "showName": true,
+  "createdOn": "https://pump.fun",
+  "name": "CapWars Australia",
+  "symbol": "AU",
+  "description": "From Sydney, Australia enters CapWars. Beyond the harbour, a new horizon calls. Oceania raises its flag and sets its sights on the world. Raise your flag. Rewrite the map. In CapWars, a higher token price can expand your faction’s influence, conquer rival countries and seize their reserves. Pick your side and follow the conquest: https://capwars.pages.dev/",
+  "image": "https://raw.githubusercontent.com/cluchetto/capwars/token-assets/token-metadata/generated/443621fa60c16dab72d91015ce3f9737b7d8c246f31126713324c1464603d59b.png",
+  "website": "https://capwars.pages.dev/",
+  "twitter": "https://x.com/capwarsupdate",
+  "telegram": "https://t.me/capwars",
+  "external_url": "https://capwars.pages.dev/",
+  "extensions": {
+    "website": "https://capwars.pages.dev/",
+    "twitter": "https://x.com/capwarsupdate",
+    "telegram": "https://t.me/capwars"
+  }
+}
